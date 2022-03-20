@@ -1,0 +1,22 @@
+# use script below
+# docker-compose up -d
+version: "3"
+services:
+  tictaktoe-client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/src:/app/src
+    # environment:
+    #   - REACT_APP_NAME=TEST
+    #   - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - ./client/.env
+  
+  tictaktoe-api:
+    build: 
+      context: ./api
+      dockerfile: ./Host/Dockerfile
+    ports:
+      - "5161:80"
