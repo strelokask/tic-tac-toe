@@ -93,23 +93,7 @@ namespace Host.Controllers
             //_mediator.PublishUpdate(game);
             return CreatedAtAction(nameof(GetGame), new { id = result.Id }, game);
         }
-
-        // DELETE: api/Games/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGame(long id)
-        {
-            var game = await _context.Games.FindAsync(id);
-            if (game == null)
-            {
-                return NotFound();
-            }
-
-            _context.Games.Remove(game);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
+        
         // POST: api/games/new
         [HttpPost("new")]
         public async Task<IActionResult> NewGame(PlayerDto player)
@@ -129,75 +113,26 @@ namespace Host.Controllers
         // PUT: api/games/join/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("join/{id}")]
-        public async Task<IActionResult> JoinGame(long id, PlayerDto player)
+        public async Task<IActionResult> JoinGame(int id, PlayerDto player)
         {
-            GameModel game = _context.Games.Find(id);
-            if (game == null)
-            {
-                return NotFound();
-            }
+            var cmd = new JoinGameCommand(id, player);
 
-            if (game.Player1 == player.Name)
-            {
-                return BadRequest("Player1 has the same name");
-            }
-
-            game.Player2 = player.Name;
-
-            _context.MarkAsModified(game);
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GameExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _mediator.Send(cmd);
 
             //_mediator.PublishUpdate(game);
+            
             return NoContent();
         }
 
         [HttpPut("move/{id}")]
-        public async Task<IActionResult> MakeMove(long id, MoveDto move)
+        public async Task<IActionResult> MakeMove(int id, MoveDto move)
         {
-            GameModel model = _context.Games.Find(id);
-            if (model == null)
-            {
-                return NotFound();
-            }
+            var cmd = new MakeMoveCommand(id, move);
 
-            string nextPlayer = model.NextPlayer == 0 ? model.Player1 : model.Player2;
-            if (!move.Validate(nextPlayer))
-            {
-                return BadRequest("Invalid move");
-            }
-
-            Game game = model.ToDomain();
-            if (game.Board[move.I, move.J] != CellStatus.Empty)
-            {
-                return BadRequest("Invalid move");
-            }
-
-            game.Board[move.I, move.J] = move.Player == model.Player1
-                ? CellStatus.Cross
-                : CellStatus.Nought;
-
-            model.StatusString = game.ToString();
-            model.NextPlayer = (model.NextPlayer + 1) % 2;
-            model.Winner = (int)game.GetWinner();
-
-            await _context.SaveChangesAsync();
+            var model = await _mediator.Send(cmd);
 
             //_mediator.PublishUpdate(model);
+
             return Ok(model);
         }
 
