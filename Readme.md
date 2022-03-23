@@ -1,7 +1,9 @@
 # Tic-Tak-Toe
 
 ## Demo
-![Demo](/docs/demo.mp4)
+https://user-images.githubusercontent.com/9603610/159675708-45236c3b-91b5-46ee-bde4-74fadf94547d.mov
+
+
 
 ## Quick start
 1. Make sure that you have [Docker](https://www.docker.com/) installed
