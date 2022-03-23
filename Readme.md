@@ -2,7 +2,7 @@
 
 ## Demo
 ![Demo](/docs/demo.mp4)
-
+demo.mp4
 ## Quick start
 1. Make sure that you have [Docker](https://www.docker.com/) installed
 2. Run `docker-compose up`
