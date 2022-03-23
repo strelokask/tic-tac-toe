@@ -176,46 +176,10 @@ export class Client {
     }
 
     /**
-     * @return Success
-     */
-    gamesDELETE(id: number): Promise<void> {
-        let url_ = this.baseUrl + "/api/Games/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "DELETE",
-            headers: {
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processGamesDELETE(_response);
-        });
-    }
-
-    protected processGamesDELETE(response: Response): Promise<void> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            return;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<void>(null as any);
-    }
-
-    /**
      * @param body (optional) 
      * @return Success
      */
-    new(body: PlayerDto | undefined): Promise<void> {
+    new(body: PlayerDto | undefined): Promise<GameModel> {
         let url_ = this.baseUrl + "/api/Games/new";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -226,6 +190,7 @@ export class Client {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             }
         };
 
@@ -234,19 +199,21 @@ export class Client {
         });
     }
 
-    protected processNew(response: Response): Promise<void> {
+    protected processNew(response: Response): Promise<GameModel> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
+        if (status === 201) {
             return response.text().then((_responseText) => {
-            return;
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameModel;
+            return result201;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<void>(null as any);
+        return Promise.resolve<GameModel>(null as any);
     }
 
     /**
@@ -330,25 +297,61 @@ export class Client {
         }
         return Promise.resolve<void>(null as any);
     }
+
+    /**
+     * @return Success
+     */
+    stream(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Games/stream/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processStream(_response);
+        });
+    }
+
+    protected processStream(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
 }
 
 export interface GameModel {
-    id?: number;
-    player1?: string | null;
-    player2?: string | null;
-    statusString?: string | null;
+    id: number;
+    player1: string;
+    player2: string;
+    statusString: string;
     nextPlayer?: number;
     winner?: number;
 }
 
 export interface MoveDto {
-    player?: string | null;
+    player?: string;
     i?: number;
     j?: number;
 }
 
 export interface PlayerDto {
-    name?: string | null;
+    name?: string;
 }
 
 export class ApiException extends Error {

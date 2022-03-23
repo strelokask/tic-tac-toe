@@ -1,12 +1,15 @@
 ﻿using Core.Commands;
 using Core.DAL;
-using Core.Domain;
 using Core.Dtos;
 using Core.Models;
+using Core.Notifications;
 using Core.Queries;
+using Core.Streams;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Host.Controllers
 {
@@ -16,11 +19,13 @@ namespace Host.Controllers
     {
         private readonly IGameContext _context;
         private readonly IMediator _mediator;
+        private readonly IGameNotification _gameNotification;
 
-        public GamesController(IGameContext context, IMediator mediator)
+        public GamesController(IGameContext context, IMediator mediator, IGameNotification gameNotification)
         {
             _context = context;
             _mediator = mediator;
+            _gameNotification = gameNotification;
         }
         // GET: api/Games
         [HttpGet]
@@ -77,7 +82,8 @@ namespace Host.Controllers
                 }
             }
 
-            //_mediator.PublishUpdate(game);
+            _gameNotification.NotifyChanges(game);
+
             return NoContent();
         }
 
@@ -96,7 +102,8 @@ namespace Host.Controllers
         
         // POST: api/games/new
         [HttpPost("new")]
-        public async Task<IActionResult> NewGame(PlayerDto player)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<GameModel>> NewGame(PlayerDto player)
         {
             GameModel game = new GameModel
             {
@@ -104,9 +111,11 @@ namespace Host.Controllers
             };
 
             _context.Games.Add(game);
+
             await _context.SaveChangesAsync();
 
-            //_mediator.PublishUpdate(game);
+            _gameNotification.NotifyChanges(game);
+
             return CreatedAtAction(nameof(GetGame), new { id = game.Id }, game);
         }
 
@@ -117,10 +126,10 @@ namespace Host.Controllers
         {
             var cmd = new JoinGameCommand(id, player);
 
-            await _mediator.Send(cmd);
+            var game = await _mediator.Send(cmd);
 
-            //_mediator.PublishUpdate(game);
-            
+            _gameNotification.NotifyChanges(game);
+
             return NoContent();
         }
 
@@ -131,36 +140,46 @@ namespace Host.Controllers
 
             var model = await _mediator.Send(cmd);
 
-            //_mediator.PublishUpdate(model);
+            _gameNotification.NotifyChanges(model);
 
             return Ok(model);
         }
 
-        //[HttpGet("stream/{id}")]
-        //public async Task StreamCounter(long id, CancellationToken cancellationToken)
-        //{
-        //    Response.StatusCode = 200;
-        //    Response.Headers.Add("Content-Type", "text/event-stream");
 
-        //    _mediator.GameUpdated += StreamValue;
+        [HttpGet("stream/{id}")]
+        [Produces("text/event-stream")]
+        public async Task StreamCounter(long id, CancellationToken cancellationToken)
+        {
+            Response.StatusCode = 200;
+            Response.Headers.Add("Content-Type", "text/event-stream");
 
-        //    while (!cancellationToken.IsCancellationRequested)
-        //    {
-        //        await Task.Delay(1000);
-        //    }
+            async void OnNotification(object sender, GameModel game)
+            {
+                if (game.Id == id)
+                {
+                    var messageJson = JsonConvert.SerializeObject(game, new JsonSerializerSettings()
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    });
+                    await Response.WriteAsync($"data:{messageJson}\n\n");
+                    await Response.Body.FlushAsync();
+                }
+            }
 
-        //    _mediator.GameUpdated -= StreamValue;
+            try
+            {
+                _gameNotification.NotificationEvent += OnNotification;
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(1000, cancellationToken);
+                }
+            }
+            finally
+            {
+                _gameNotification.NotificationEvent -= OnNotification;
+            }
 
-        //    async void StreamValue(object sender, GameModel game)
-        //    {
-        //        if (game.Id == id)
-        //        {
-        //            var messageJson = JsonConvert.SerializeObject(game, _jsonSettings);
-        //            await Response.WriteAsync($"data:{messageJson}\n\n");
-        //            await Response.Body.FlushAsync();
-        //        }
-        //    }
-        //}
+        }
 
         private bool GameExists(long id)
         {

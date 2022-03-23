@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.8.2",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.5.1",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
@@ -21,9 +24,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint src/**/*.ts src/**/*.tsx",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --write \"**/*.+(js|jsx|css|md)\"",
     "nswag:client": "nswag openapi2tsclient /typeStyle:interface /NullValue:Null /input:http://localhost:5161/swagger/v1/swagger.json /output:src/app/ApiClient.ts"
   },
   "eslintConfig": {
@@ -45,16 +45,6 @@
     ]
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.15.0",
-    "@typescript-eslint/parser": "^5.15.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^5.2.0",
-    "eslint-plugin-react": "^7.29.4",
-    "prettier": "^2.6.0"
+    "eslint-config-react-app": "^7.0.0"
   }
 }

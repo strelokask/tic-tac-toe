@@ -1,10 +1,11 @@
 ﻿using Core.DAL;
 using Core.Dtos;
+using Core.Models;
 using MediatR;
 
 namespace Core.Commands
 {
-    public class JoinGameCommand : IRequest
+    public class JoinGameCommand : IRequest<GameModel>
     {
         public int GameId { get; }
         public PlayerDto Player { get; }
@@ -16,7 +17,7 @@ namespace Core.Commands
         }
     }
 
-    public class JoinGameHandler : IRequestHandler<JoinGameCommand, Unit>
+    public class JoinGameHandler : IRequestHandler<JoinGameCommand, GameModel>
     {
         private readonly IGameContext _context;
 
@@ -24,7 +25,7 @@ namespace Core.Commands
         {
             _context = context;
         }
-        public async Task<Unit> Handle(JoinGameCommand request, CancellationToken cancellationToken)
+        public async Task<GameModel> Handle(JoinGameCommand request, CancellationToken cancellationToken)
         {
             var game = _context.Games.FirstOrDefault(g => g.Id.Equals(request.GameId));
 
@@ -45,7 +46,7 @@ namespace Core.Commands
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+            return game;
         }
     }
 }

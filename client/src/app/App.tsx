@@ -1,38 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import logo from './../logo.svg';
-import { GameModel } from './ApiClient';
+import React from 'react'
+import { Player } from '../components/Player'
 import './App.css';
-import { apiClient } from './client';
+import { Opponent } from '../components/Opponent';
+import { GameProvider } from './GameContext';
+import { Board } from '../components/Board';
+import { createTheme, ThemeProvider } from '@mui/material';
+
+const theme = createTheme({
+  components:{
+    MuiPaper:{
+      styleOverrides:{
+        root:{
+          margin: 20,
+          padding: 15,
+          border: '1px solid whitesmoke',
+        }
+      }
+    }
+  }
+});
 
 const App : React.FC = () => {
-  const [games, setGames] = useState<GameModel[]>([]);
-  console.table(games);
-  useEffect(() => {
-    async function fetchMyAPI() {
-      const response = await apiClient.gamesAll();
-      setGames(response)
-    }
-
-    fetchMyAPI()
-  }, [])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React {process.env.REACT_APP_NAME}
-        </a>
+    <div className="app">
+      <header className="app-header">
       </header>
+      <div className="app-content">
+        <ThemeProvider theme={theme}>
+          <GameProvider>
+            <Player />
+            <Opponent />
+
+            <Board />
+          </GameProvider>
+        </ThemeProvider>
+      </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
