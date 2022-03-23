@@ -7,7 +7,7 @@ import { replaceAt } from "../utils";
 import { BoardCell } from "./BoardCell";
 
 export const Board : FC = () => {
-    const {game, play, updateGame} = useGame();
+    const {game, play, updateBoard} = useGame();
     
     const {boardStatus, id, player, playerName} = game;
     const {playing, turn} = play;
@@ -39,24 +39,22 @@ export const Board : FC = () => {
 
             const status = replaceAt(boardStatus, 3 * i + j, player === Players.Player1 ? 'X' : 'O');
 
-            updateGame({...game, boardStatus: status})
+            updateBoard(status);
         }
     }
 
     if(playing)
         return <Card>
             <div className="board">
-                {cells.map((row, i) => {
-                    return row.map((cell, j) => {
-                        return <BoardCell 
+                {cells.map((row, i) => row.map((cell, j) => 
+                    <BoardCell 
                         status={cell} 
                         playerTurn={turn} 
                         handleClick={handleClick}
                         i={i} j ={j}
                         key={3 * i + j}
-                        />
-                    })
-                })}
+                    />)
+                )}
             </div>
         </Card>
 

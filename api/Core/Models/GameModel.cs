@@ -16,7 +16,7 @@ namespace Core.Models
 
         [Required]
         public string StatusString { get; set; } = "         ";
-
+        [Required]
         public int NextPlayer { get; set; } = 0;
 
         public int Winner { get; set; } = 0;

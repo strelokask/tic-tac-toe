@@ -62,3 +62,14 @@ svg.active:hover{
   background-color: lightblue;
   cursor: pointer;
 }
+
+svg.cross {
+  stroke: #bbb;
+  stroke-width: 5;
+}
+
+svg.nought {
+  stroke: #42b94c;
+  stroke-width: 5;
+  fill: none;
+}

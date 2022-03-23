@@ -340,7 +340,7 @@ export interface GameModel {
     player1: string;
     player2: string;
     statusString: string;
-    nextPlayer?: number;
+    nextPlayer: number;
     winner?: number;
 }
 

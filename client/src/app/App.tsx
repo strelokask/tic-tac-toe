@@ -5,6 +5,7 @@ import { Opponent } from '../components/Opponent';
 import { GameProvider } from './GameContext';
 import { Board } from '../components/Board';
 import { createTheme, ThemeProvider } from '@mui/material';
+import { GameOver } from '../components/GameOver';
 
 const theme = createTheme({
   components:{
@@ -30,8 +31,8 @@ const App : React.FC = () => {
           <GameProvider>
             <Player />
             <Opponent />
-
             <Board />
+            <GameOver />
           </GameProvider>
         </ThemeProvider>
       </div>
