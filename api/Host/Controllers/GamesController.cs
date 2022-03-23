@@ -6,7 +6,6 @@ using Core.Notifications;
 using Core.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -26,16 +25,6 @@ namespace Host.Controllers
             _mediator = mediator;
             _gameNotification = gameNotification;
         }
-        // GET: api/Games
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<GameModel>>> GetGames(CancellationToken cancellationToken)
-        {
-            var query = new GetGamesQuery();
-
-            var result = await _mediator.Send(query, cancellationToken);
-
-            return Ok(result);
-        }
 
         // GET: api/Games/5
         [HttpGet("{id}")]
@@ -51,52 +40,6 @@ namespace Host.Controllers
             }
 
             return game;
-        }
-
-        // PUT: api/Games/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutGame(long id, GameModel game)
-        {
-            if (id != game.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.MarkAsModified(game);
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GameExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            _gameNotification.NotifyChanges(game);
-
-            return NoContent();
-        }
-
-        // POST: api/Games
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<GameModel>> PostGame(GameModel game, CancellationToken cancellationToken)
-        {
-            var cmd = new CreateGameCommand(game);
-
-            var result = await _mediator.Send(cmd, cancellationToken);
-
-            //_mediator.PublishUpdate(game);
-            return CreatedAtAction(nameof(GetGame), new { id = result.Id }, game);
         }
         
         // POST: api/games/new
@@ -178,11 +121,6 @@ namespace Host.Controllers
                 _gameNotification.NotificationEvent -= OnNotification;
             }
 
-        }
-
-        private bool GameExists(long id)
-        {
-            return _context.Games.Any(e => e.Id == id);
         }
     }
 }

@@ -108,7 +108,7 @@ export const GameProvider : FC = ({children}) => {
             const gameId = +(urlParams.get("join") ?? 0);
 
             const getGame = async () => {
-                const response = await apiClient.gamesGET(gameId);
+                const response = await apiClient.games(gameId);
                 
                 gameRef.current = {
                     ...gameRef.current,
